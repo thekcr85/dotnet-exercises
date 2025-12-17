@@ -32,7 +32,7 @@ app.Run(async (HttpContext context) =>
 	{
 		if (context.Request.Path.StartsWithSegments("/employees"))
 		{
-			var reader = new StreamReader(context.Request.Body);
+			using var reader = new StreamReader(context.Request.Body); // Using 'using' to ensure proper disposal after use to prevent memory leaks so that the stream is closed after reading.
 			var body = await reader.ReadToEndAsync();
 			var employee = JsonSerializer.Deserialize<Employee>(body);
 
