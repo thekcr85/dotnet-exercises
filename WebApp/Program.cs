@@ -1,4 +1,5 @@
 using System.Text.Json;
+using static EmployeesRepository;
 
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
@@ -42,9 +43,24 @@ app.Run(async (HttpContext context) =>
 		{
 		}
 	}
-	else
+	else if (context.Request.Method == "PUT")
 	{
-		await context.Response.WriteAsync($"The method {context.Request.Method} is not supported.\r\n");
+		using var reader = new StreamReader(context.Request.Body);
+		var body = await reader.ReadToEndAsync();
+		var employee = JsonSerializer.Deserialize<Employee>(body);
+
+		var result = EmployeesRepository.UpdateEmployee(employee);
+		if (result)
+		{
+			await context.Response.WriteAsync("Employee updated successfully.");
+		}
+		else
+		{
+			await context.Response.WriteAsync("Employee not found.");
+		}
+	}
+	else if (context.Request.Method == "DELETE")
+	{
 	}
 });
 
@@ -63,27 +79,41 @@ static class EmployeesRepository
 
 	public static void AddEmployee(Employee? employee)
 	{
-		if (employee is null)
-		{
-			throw new ArgumentNullException(nameof(employee));
-		}
+		ArgumentNullException.ThrowIfNull(employee);
 
 		employees.Add(employee);
 	}
-}
 
-public class Employee
-{
-	public Employee(int id, string name, string position, double salary)
+	public static bool UpdateEmployee(Employee? employee)
 	{
-		Id = id;
-		Name = name;
-		Position = position;
-		Salary = salary;
+		ArgumentNullException.ThrowIfNull(employee);
+
+		var existingEmployee = employees.FirstOrDefault(e => e.Id == employee.Id);
+
+		if (existingEmployee != null)
+		{
+			existingEmployee.Name = employee.Name;
+			existingEmployee.Position = employee.Position;
+			existingEmployee.Salary = employee.Salary;
+			return true;
+		}
+
+		return false;
 	}
 
-	public int Id { get; set; }
-	public string Name { get; set; }
-	public string Position { get; set; }
-	public double Salary { get; set; }
+	public class Employee
+	{
+		public Employee(int id, string name, string position, double salary)
+		{
+			Id = id;
+			Name = name;
+			Position = position;
+			Salary = salary;
+		}
+
+		public int Id { get; set; }
+		public string Name { get; set; }
+		public string Position { get; set; }
+		public double Salary { get; set; }
+	}
 }
