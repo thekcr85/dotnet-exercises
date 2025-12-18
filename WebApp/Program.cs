@@ -45,22 +45,48 @@ app.Run(async (HttpContext context) =>
 	}
 	else if (context.Request.Method == "PUT")
 	{
-		using var reader = new StreamReader(context.Request.Body);
-		var body = await reader.ReadToEndAsync();
-		var employee = JsonSerializer.Deserialize<Employee>(body);
+		if (context.Request.Path.StartsWithSegments("/employees"))
+		{
+			using var reader = new StreamReader(context.Request.Body);
+			var body = await reader.ReadToEndAsync();
+			var employee = JsonSerializer.Deserialize<Employee>(body);
 
-		var result = EmployeesRepository.UpdateEmployee(employee);
-		if (result)
-		{
-			await context.Response.WriteAsync("Employee updated successfully.");
+			var result = EmployeesRepository.UpdateEmployee(employee);
+			if (result)
+			{
+				await context.Response.WriteAsync("Employee updated successfully.");
+			}
+			else
+			{
+				await context.Response.WriteAsync("Employee not found.");
+			}
 		}
-		else
-		{
-			await context.Response.WriteAsync("Employee not found.");
-		}
+
 	}
 	else if (context.Request.Method == "DELETE")
 	{
+		if (context.Request.Path.StartsWithSegments("/employees"))
+		{
+			if (context.Request.Query.ContainsKey("id"))
+			{
+				var id = context.Request.Query["id"];
+				if (int.TryParse(id, out int employeeId))
+				{
+					var result = EmployeesRepository.DeleteEmployee(employeeId);
+					if (result)
+					{
+						await context.Response.WriteAsync("Employee deleted successfully.");
+					}
+					else
+					{
+						await context.Response.WriteAsync("Employee not found.");
+					}
+
+				}
+
+			}
+		}
+
 	}
 });
 
@@ -101,19 +127,33 @@ static class EmployeesRepository
 		return false;
 	}
 
-	public class Employee
+	public static bool DeleteEmployee(int id)
 	{
-		public Employee(int id, string name, string position, double salary)
+		var employee = employees.FirstOrDefault(e => e.Id == id);
+
+		if (employee != null)
 		{
-			Id = id;
-			Name = name;
-			Position = position;
-			Salary = salary;
+			employees.Remove(employee);
+			return true;
 		}
 
-		public int Id { get; set; }
-		public string Name { get; set; }
-		public string Position { get; set; }
-		public double Salary { get; set; }
+		return false;
 	}
 }
+
+public class Employee
+{
+	public Employee(int id, string name, string position, double salary)
+	{
+		Id = id;
+		Name = name;
+		Position = position;
+		Salary = salary;
+	}
+
+	public int Id { get; set; }
+	public string Name { get; set; }
+	public string Position { get; set; }
+	public double Salary { get; set; }
+}
+
