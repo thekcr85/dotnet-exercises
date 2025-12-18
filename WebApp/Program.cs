@@ -73,14 +73,21 @@ app.Run(async (HttpContext context) =>
 				var id = context.Request.Query["id"];
 				if (int.TryParse(id, out int employeeId))
 				{
-					var result = EmployeesRepository.DeleteEmployee(employeeId);
-					if (result)
+					if (context.Request.Headers["Authorization"] == "Michael")
 					{
-						await context.Response.WriteAsync("Employee deleted successfully.");
+						var result = EmployeesRepository.DeleteEmployee(employeeId);
+						if (result)
+						{
+							await context.Response.WriteAsync("Employee deleted successfully.");
+						}
+						else
+						{
+							await context.Response.WriteAsync("Employee not found.");
+						}
 					}
 					else
 					{
-						await context.Response.WriteAsync("Employee not found.");
+						await context.Response.WriteAsync($"You are not authorized to delete employee {employeeId}.");
 					}
 
 				}
