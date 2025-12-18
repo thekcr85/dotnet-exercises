@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Linq;
 using static EmployeesRepository;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -101,7 +102,7 @@ static class EmployeesRepository
 		new Employee(3, "Susan", "Recruiter", 34000)
 	};
 
-	public static List<Employee> GetEmployees() => employees;
+	public static List<Employee> GetEmployees() => employees.OrderBy(e => e.Id).ToList();
 
 	public static void AddEmployee(Employee? employee)
 	{
