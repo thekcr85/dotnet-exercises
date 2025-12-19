@@ -13,14 +13,18 @@ app.Use(async (context, next) =>
 });
 
 // Middleware #2
-app.Use(async (context, next) =>
+//app.Use(async (context, next) =>
+//{
+//	await context.Response.WriteAsync("Middleware #2: Before calling next\n");
+
+//	await next(context);
+
+//	await context.Response.WriteAsync("Middleware #2: After calling next\n");
+
+//});
+app.Run(async (context) =>
 {
-	await context.Response.WriteAsync("Middleware #2: Before calling next\n");
-
-	await next(context);
-
-	await context.Response.WriteAsync("Middleware #2: After calling next\n");
-
+	await context.Response.WriteAsync("Middleware #2: Processed\n");
 });
 
 // Middleware #3
