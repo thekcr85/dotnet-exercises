@@ -9,6 +9,29 @@ app.Run(async (HttpContext context) =>
 	{
 		if (context.Request.Method == "GET")
 		{
+			if (context.Request.Query.ContainsKey("id"))
+			{
+				var id = context.Request.Query["id"];
+				if (!string.IsNullOrEmpty(id))
+				{
+					if (int.TryParse(id, out int employeeId))
+					{
+						var employee = EmployeesRepository.GetEmployees().FirstOrDefault(e => e.Id == employeeId);
+						if (employee != null)
+						{
+							context.Response.StatusCode = 200;
+							await context.Response.WriteAsync($"ID: {employee.Id}) Name: {employee.Name}\tPosition: {employee.Position}\tSalary: {employee.Salary}");
+						}
+						else
+						{
+							context.Response.StatusCode = 404;
+							await context.Response.WriteAsync("Employee not found.");
+						}
+						return;
+					}
+				}
+			}
+
 			var employees = EmployeesRepository.GetEmployees();
 
 			context.Response.StatusCode = 200;
