@@ -11,7 +11,7 @@ app.Run(async (HttpContext context) =>
 		{
 			var employees = EmployeesRepository.GetEmployees();
 
-			context.Response.StatusCode = 200; 
+			context.Response.StatusCode = 200;
 			foreach (var employee in employees)
 			{
 				await context.Response.WriteAsync($"ID: {employee.Id}) Name: {employee.Name}\tPosition: {employee.Position}\tSalary: {employee.Salary}");
@@ -23,13 +23,26 @@ app.Run(async (HttpContext context) =>
 		{
 			using var reader = new StreamReader(context.Request.Body); // Using 'using' to ensure proper disposal after use to prevent memory leaks so that the stream is closed after reading.
 			var body = await reader.ReadToEndAsync();
-			var employee = JsonSerializer.Deserialize<Employee>(body);
 
-			EmployeesRepository.AddEmployee(employee);
+			try
+			{
+				var employee = JsonSerializer.Deserialize<Employee>(body);
 
-			context.Response.StatusCode = 201;
-			await context.Response.WriteAsync("Employee added successfully.");
+				if (employee is null || employee.Id <= 0)
+				{
+					context.Response.StatusCode = 400;
+					return;
+				}
+				EmployeesRepository.AddEmployee(employee);
 
+				context.Response.StatusCode = 201;
+				await context.Response.WriteAsync("Employee added successfully.");
+			}
+			catch (Exception ex)
+			{
+				context.Response.StatusCode = 400;
+				return;
+			}
 		}
 		else if (context.Request.Method == "PUT")
 		{
@@ -43,7 +56,7 @@ app.Run(async (HttpContext context) =>
 				context.Response.StatusCode = 204;
 				await context.Response.WriteAsync("Employee updated successfully.");
 
-				return; 
+				return;
 			}
 			else
 			{
@@ -91,6 +104,10 @@ app.Run(async (HttpContext context) =>
 			await context.Response.WriteAsync($"<li><b>{key}:</b> {context.Request.Headers[key]}</li><br>");
 		}
 		await context.Response.WriteAsync("</ol>");
+	}
+	else
+	{
+		context.Response.StatusCode = 404;
 	}
 });
 
