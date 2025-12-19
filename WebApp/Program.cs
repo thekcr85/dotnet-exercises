@@ -79,14 +79,18 @@ app.Run(async (HttpContext context) =>
 	}
 	else if (context.Request.Path == "/")
 	{
-		await context.Response.WriteAsync($"The method is: {context.Request.Method}\r\n");
-		await context.Response.WriteAsync($"The path is: {context.Request.Path}\r\n");
+		context.Response.ContentType = "text/html";
 
-		await context.Response.WriteAsync("\r\nHeaders:\r\n");
+		await context.Response.WriteAsync($"The method is: {context.Request.Method}<br>");
+		await context.Response.WriteAsync($"The path is: {context.Request.Path}<br><br>");
+
+		await context.Response.WriteAsync("<h1>Headers:</h1>");
+		await context.Response.WriteAsync("<ol>");
 		foreach (var key in context.Request.Headers.Keys)
 		{
-			await context.Response.WriteAsync($"{key}: {context.Request.Headers[key]}\r\n");
+			await context.Response.WriteAsync($"<li><b>{key}:</b> {context.Request.Headers[key]}</li><br>");
 		}
+		await context.Response.WriteAsync("</ol>");
 	}
 });
 
