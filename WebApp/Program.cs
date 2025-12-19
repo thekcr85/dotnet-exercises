@@ -85,6 +85,7 @@ app.Run(async (HttpContext context) =>
 					}
 					else
 					{
+						context.Response.StatusCode = 401;
 						await context.Response.WriteAsync($"You are not authorized to delete employee {employeeId}.");
 					}
 				}
