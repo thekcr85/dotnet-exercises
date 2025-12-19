@@ -80,6 +80,7 @@ app.Run(async (HttpContext context) =>
 						}
 						else
 						{
+							context.Response.StatusCode = 404;
 							await context.Response.WriteAsync("Employee not found.");
 						}
 					}
