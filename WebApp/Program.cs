@@ -41,6 +41,7 @@ app.Run(async (HttpContext context) =>
 			catch (Exception ex)
 			{
 				context.Response.StatusCode = 400;
+				await context.Response.WriteAsync($"{ex.ToString()}");
 				return;
 			}
 		}
