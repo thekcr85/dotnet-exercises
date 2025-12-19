@@ -1,3 +1,5 @@
+using System.Reflection.PortableExecutable;
+
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
 
@@ -12,27 +14,28 @@ app.Use(async (context, next) =>
 
 });
 
-app.Map("/employees", (appBuilder) =>
-{
-	appBuilder.Use(async (context, next) =>
+app.MapWhen(
+	context => context.Request.Query.ContainsKey("id"), 
+	appBuilder =>
 	{
-		await context.Response.WriteAsync("Middleware #5: Before calling next\n");
+		appBuilder.Use(async (context, next) =>
+		{
+			await context.Response.WriteAsync($"Middleware #7: Before calling next - Id: {context.Request.Query["id"].ToString()}\n");
 
-		await next(context);
+			await next(context);
 
-		await context.Response.WriteAsync("Middleware #5: After calling next\n");
+			await context.Response.WriteAsync($"Middleware #7: After calling next - Id: {context.Request.Query["id"].ToString()}\n");
+		});
+
+		appBuilder.Use(async (context, next) =>
+		{
+			await context.Response.WriteAsync($"Middleware #8: Before calling next - Id: {context.Request.Query["id"].ToString()}\n");
+
+			await next(context);
+
+			await context.Response.WriteAsync($"Middleware #8: After calling next - Id: {context.Request.Query["id"].ToString()}\n");
+		});
 	});
-
-	appBuilder.Use(async (context, next) =>
-	{
-		await context.Response.WriteAsync("Middleware #6: Before calling next\n");
-
-		await next(context);
-
-		await context.Response.WriteAsync("Middleware #6: After calling next\n");
-	});
-
-});
 
 // Middleware #2
 app.Use(async (context, next) =>
