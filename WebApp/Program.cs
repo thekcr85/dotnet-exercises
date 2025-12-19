@@ -16,7 +16,7 @@ app.Run(async (HttpContext context) =>
 				{
 					if (int.TryParse(id, out int employeeId))
 					{
-						var employee = EmployeesRepository.GetEmployees().FirstOrDefault(e => e.Id == employeeId);
+						var employee = EmployeesRepository.GetEmployeeById(employeeId);
 						if (employee != null)
 						{
 							context.Response.StatusCode = 200;
@@ -149,6 +149,8 @@ static class EmployeesRepository
 	};
 
 	public static List<Employee> GetEmployees() => employees.OrderBy(e => e.Id).ToList();
+
+	public static Employee? GetEmployeeById(int id) => employees.FirstOrDefault(e => e.Id == id);
 
 	public static void AddEmployee(Employee? employee)
 	{
