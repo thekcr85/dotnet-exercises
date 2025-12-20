@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="LearnMiddleware/LearnMiddleware.csproj" Id="0782e24f-18b6-4aeb-9146-ae55b751b747" />
+  <Project Path="LearnRouting/LearnRouting.csproj" Id="3d70bdbc-e7f5-495c-8022-d36f682c3ff8" />
   <Project Path="WebApp/WebApp.csproj" />
 </Solution>
