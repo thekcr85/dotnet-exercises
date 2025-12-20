@@ -1,7 +1,11 @@
+using LearnMiddleware.Middleware;
 using System.Reflection.PortableExecutable;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddTransient<MyCustomMiddleware>();
 var app = builder.Build();
+
+app.UseMiddleware<MyCustomMiddleware>();
 
 // Middleware #1
 app.Use(async (context, next) =>
