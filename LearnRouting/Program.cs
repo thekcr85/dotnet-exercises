@@ -34,6 +34,11 @@ app.UseEndpoints(endpoints =>
 	{
 		await context.Response.WriteAsync($"Delete an employee with id: {context.Request.RouteValues["id"]} ");
 	});
+
+	endpoints.MapGet("/categories/{size=medium}", async (HttpContext context) =>
+	{
+		await context.Response.WriteAsync($"Get categories in size: {context.Request.RouteValues["size"]} ");
+	});
 });
 
 app.Run();
