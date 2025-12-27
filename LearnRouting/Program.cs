@@ -32,7 +32,7 @@ app.UseEndpoints(endpoints =>
 
 	endpoints.MapDelete("/employees/{id}", async (HttpContext context) =>
 	{
-		await context.Response.WriteAsync("Delete an employee");
+		await context.Response.WriteAsync($"Delete an employee with id: {context.Request.RouteValues["id"]} ");
 	});
 });
 
