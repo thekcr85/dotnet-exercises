@@ -42,21 +42,6 @@ app.UseEndpoints(endpoints =>
 		await context.Response.WriteAsync($"Delete an employee with id: {context.Request.RouteValues["id"]} ");
 	});
 
-	endpoints.MapGet("/{category=jeans}/{size=medium}/{id?}", async (HttpContext context) =>
-	{
-		await context.Response.WriteAsync($"Get category: {context.Request.RouteValues["category"]} in size: {context.Request.RouteValues["size"]} with id: {context.Request.RouteValues["id"]} ");
-	});
-
-	endpoints.MapGet("/employees/{id:int}", async (HttpContext context) =>
-	{
-		await context.Response.WriteAsync($"Get employee: {context.Request.RouteValues["id"]}");
-	});
-
-	endpoints.MapGet("/employees/{name}", async (HttpContext context) =>
-	{
-		await context.Response.WriteAsync($"Get employee: {context.Request.RouteValues["name"]}");
-	});
-
 	endpoints.MapGet("/employees/positions/{position:position}", async (HttpContext context) =>
 	{
 		await context.Response.WriteAsync($"Get employees under position: {context.Request.RouteValues["position"]}");
