@@ -1,74 +1,92 @@
-
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.Configure<RouteOptions>(options =>
-{
-	options.ConstraintMap.Add("position", typeof(PositionConstraint));
-});
 
 var app = builder.Build();
 
-app.Use(async (context, next) =>
-{
-	await next(context);
-});
-
 app.UseRouting();
-
-app.Use(async (context, next) =>
-{
-	await next(context);
-});
 
 app.UseEndpoints(endpoints =>
 {
+	endpoints.MapGet("/", async (HttpContext context) =>
+	{
+		await context.Response.WriteAsync("Welcome to the Employee Management System");
+	});
+
 	endpoints.MapGet("/employees", async (HttpContext context) =>
 	{
-		await context.Response.WriteAsync("Get employees");
+		var employees = EmployeesRepository.GetAll();
+		await context.Response.WriteAsJsonAsync(employees);
+	});
+
+	endpoints.MapGet("/employees/{id:int}", async (HttpContext context) =>
+	{
+		var id = Convert.ToInt32(context.Request.RouteValues["id"]);
+		var employee = EmployeesRepository.GetById(id);
+		if (employee != null)
+		{
+			await context.Response.WriteAsJsonAsync(employee);
+		}
+		else
+		{
+			context.Response.StatusCode = StatusCodes.Status404NotFound;
+			await context.Response.WriteAsync("Employee not found");
+		}
 	});
 
 	endpoints.MapPost("/employees", async (HttpContext context) =>
 	{
-		await context.Response.WriteAsync("Create an employee");
+		var employee = await context.Request.ReadFromJsonAsync<Employee>();
+		if (employee != null)
+		{
+			EmployeesRepository.Add(employee);
+			context.Response.StatusCode = StatusCodes.Status201Created;
+			context.Response.Headers.Location = $"/employees/{employee.Id}";
+			await context.Response.WriteAsJsonAsync(employee);
+		}
+		else
+		{
+			context.Response.StatusCode = StatusCodes.Status400BadRequest;
+			await context.Response.WriteAsync("Invalid employee data");
+		}
 	});
 
-	endpoints.MapPut("/employees/", async (HttpContext context) =>
+	endpoints.MapPut("/employees/{id:int}", async (HttpContext context) =>
 	{
-		await context.Response.WriteAsync("Update an employee");
+		var id = Convert.ToInt32(context.Request.RouteValues["id"]);
+		var employee = await context.Request.ReadFromJsonAsync<Employee>();
+		if (employee == null)
+		{
+			context.Response.StatusCode = StatusCodes.Status400BadRequest;
+			await context.Response.WriteAsync("Invalid employee data");
+			return;
+		}
+
+		var existing = EmployeesRepository.GetById(id);
+		if (existing == null)
+		{
+			context.Response.StatusCode = StatusCodes.Status404NotFound;
+			await context.Response.WriteAsync("Employee not found");
+			return;
+		}
+
+		employee.Id = id;
+		EmployeesRepository.Update(employee);
+		context.Response.StatusCode = StatusCodes.Status204NoContent;
 	});
 
-	endpoints.MapDelete("/employees/{id}", async (HttpContext context) =>
+	endpoints.MapDelete("/employees/{id:int}", async (HttpContext context) =>
 	{
-		await context.Response.WriteAsync($"Delete an employee with id: {context.Request.RouteValues["id"]} ");
-	});
+		var id = Convert.ToInt32(context.Request.RouteValues["id"]);
+		var existing = EmployeesRepository.GetById(id);
+		if (existing == null)
+		{
+			context.Response.StatusCode = StatusCodes.Status404NotFound;
+			await context.Response.WriteAsync("Employee not found");
+			return;
+		}
 
-	endpoints.MapGet("/employees/positions/{position:position}", async (HttpContext context) =>
-	{
-		await context.Response.WriteAsync($"Get employees under position: {context.Request.RouteValues["position"]}");
+		EmployeesRepository.Delete(id);
+		context.Response.StatusCode = StatusCodes.Status204NoContent;
 	});
 });
 
 app.Run();
-
-class PositionConstraint : IRouteConstraint
-{
-	public bool Match(HttpContext? httpContext, IRouter? route, string routeKey, RouteValueDictionary values, RouteDirection routeDirection)
-	{
-		if (!values.ContainsKey(routeKey))
-		{
-			return false;
-		}
-
-		if (values[routeKey] is null)
-		{
-			return false;
-		}
-
-		if (values[routeKey].ToString().Equals("manager", StringComparison.OrdinalIgnoreCase) || values[routeKey].ToString().Equals("developer", StringComparison.OrdinalIgnoreCase))
-		{
-			return true;
-		}
-
-		return false;
-	}
-}
