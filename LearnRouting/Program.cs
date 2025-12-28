@@ -1,5 +1,11 @@
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<RouteOptions>(options =>
+{
+	options.ConstraintMap.Add("position", typeof(PositionConstraint));
+});
+
 var app = builder.Build();
 
 app.Use(async (context, next) =>
