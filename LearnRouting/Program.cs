@@ -56,6 +56,11 @@ app.UseEndpoints(endpoints =>
 	{
 		await context.Response.WriteAsync($"Get employee: {context.Request.RouteValues["name"]}");
 	});
+
+	endpoints.MapGet("/employees/positions/{position:position}", async (HttpContext context) =>
+	{
+		await context.Response.WriteAsync($"Get employees under position: {context.Request.RouteValues["position"]}");
+	});
 });
 
 app.Run();
